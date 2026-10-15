@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ярослав Кукар — Game / Level Designer · Игро Тэк</title>
+<meta name="description" content="Резюме Game / Level Designer в форме играбельной локации: блокаут, слои дизайна, плейтест-отчёт и дизайн-документ.">
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-left">
+    <span class="dot"></span>
+    <strong>ОБЪЕКТ КАДРИС</strong>
+    <span class="tb-sub">интерактивное резюме левел-дизайнера</span>
+  </div>
+  <nav class="tb-nav">
+    <a href="#level" class="navlink" data-term="level">локация</a>
+    <a href="#cases" class="navlink">кейсы</a>
+    <a href="#igrotech" class="navlink">игро тэк</a>
+    <a href="#contacts" class="navlink">контакты</a>
+  </nav>
+  <div class="tb-right">
+    <button id="btnRestart" class="btn sm" title="R">заново</button>
+    <button id="btnDoc" class="btn sm">документ</button>
+  </div>
+</header>
+
+<!-- ===================== ИГРА ===================== -->
+<section class="stage">
+  <canvas id="game"></canvas>
+
+  <div class="hud tl">
+    <div class="hp">
+      <span class="hp-k">целостность</span>
+      <span class="hp-n"><b id="hpNum">100</b></span>
+      <div class="bar"><i id="hpFill" style="width:100%"></i></div>
+    </div>
+    <div class="ammoslots">
+      <div class="ammo-row"><span class="k">винтовка</span><span class="v" id="ammo">24 / 24</span></div>
+      <div class="ammo-row"><span class="k">рывок</span><span class="bar sm"><i id="dashFill"></i></span></div>
+      <div class="ammo-row"><span class="k">заряд <em id="nadeCd">ПКМ</em></span><span class="bar sm n"><i id="nadeFill"></i></span></div>
+    </div>
+  </div>
+
+  <div class="hud tr">
+    <div class="statuspanel">
+      <div class="clock"><span id="clock">0:00</span><span class="k">время</span></div>
+      <div class="wave"><span class="k">бой</span><span class="v" id="wave">контактов нет</span></div>
+      <div class="kills"><b id="kills">0</b><span class="k">дронов</span></div>
+    </div>
+    <div class="objectives">
+      <div class="obj-t">задачи · <span id="objCount">0/6</span></div>
+      <ul id="objList" class="objlist"></ul>
+    </div>
+  </div>
+
+  <div class="hud bl">
+    <div class="zone" id="zone">Зона A · Док</div>
+    <div class="layerbar">
+      <span class="k">слой</span><span class="v" id="layer">выключен</span>
+      <span class="lbtns">
+        <button class="layerbtn on" data-layer="0">выкл</button>
+        <button class="layerbtn" data-layer="1">1</button>
+        <button class="layerbtn" data-layer="2">2</button>
+        <button class="layerbtn" data-layer="3">3</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="hud br">
+    <canvas id="minimap" width="180" height="123"></canvas>
+  </div>
+
+  <div class="crosshair" aria-hidden="true"></div>
+  <div id="flash" class="flash"></div>
+</section>
+
+<!-- ===================== ЭКРАНЫ ===================== -->
+
+<div id="brief" class="screen">
+  <div class="sheet">
+    <div class="sheet-h">
+      <div class="tag">брифинг</div>
+      <h1>ОБЪЕКТ КАДРИС</h1>
+      <p class="sub">Game / Level Designer · ООО «Игро Тэк»</p>
+    </div>
+    <div id="briefBody" class="sheet-b"></div>
+    <div class="sheet-f">
+      <button id="btnStart" class="btn big">В бой · читать уровень</button>
+      <span class="hint">или пробелом</span>
+    </div>
+  </div>
+</div>
+
+<div id="report" class="screen">
+  <div class="sheet wide">
+    <div class="sheet-h">
+      <div class="tag">плейтест</div>
+      <h1 id="reportTitle">Отчёт по плейтесту</h1>
+      <p class="sub">метрики сняты из этого прохождения, а не вписаны в текст</p>
+    </div>
+    <div id="reportBody" class="sheet-b"></div>
+    <div class="sheet-f">
+      <button id="reportClose" class="btn">вернуться в уровень</button>
+      <span class="hint">R — пройти заново</span>
+    </div>
+  </div>
+</div>
+
+<div id="termPanel" class="termpanel">
+  <div class="term-inner">
+    <div class="term-h">
+      <div>
+        <div class="tag" id="termSub">раздел</div>
+        <h2 id="termTitle">Раздел</h2>
+      </div>
+      <button id="termClose" class="btn sm">закрыть · esc</button>
+    </div>
+    <div id="termBody" class="term-b"></div>
+  </div>
+</div>
+
+<div id="mobileNote" class="mobilenote">
+  Уровень рассчитан на мышь и клавиатуру. Ниже — тот же материал в виде документа.
+</div>
+
+<!-- ===================== ДОКУМЕНТ ===================== -->
+<main class="doc">
+
+  <section class="doc-hero">
+    <div class="hero-l">
+      <div class="tag">резюме · версия 1.0</div>
+      <h1 id="dName">—</h1>
+      <p class="role" id="dRole">—</p>
+      <p class="sub" id="dSub">—</p>
+      <div class="hero-meta">
+        <span id="dVacancy"></span>
+        <span id="dCity"></span>
+        <span class="doc-contacts" id="dContacts"></span>
+      </div>
+    </div>
+    <div class="hero-r">
+      <div class="stats" id="dStats"></div>
+    </div>
+  </section>
+
+  <section class="doc-sec" id="level">
+    <h2 class="sec-h">Локация: как она устроена</h2>
+    <p>Ниже — та же карта, что и в игре наверху, только разобранная на части. Всё, что здесь
+      написано, считается из геометрии карты, а не вписано руками.</p>
+
+    <h3 class="sec-h3">Сетка и площади по зонам</h3>
+    <table class="tbl">
+      <tr><th>зона</th><th>игровая площадь</th><th>укрытий</th><th>проходимой пола</th></tr>
+      <tbody id="dMetrics"></tbody>
+    </table>
+    <p class="cap" id="dMetricTotal"></p>
+
+    <h3 class="sec-h3">Четыре правила, из которых собрана планировка</h3>
+    <div class="cols2" id="dRules"></div>
+
+    <h3 class="sec-h3">Слои, которые видны в игре по клавишам 1–4</h3>
+    <table class="tbl">
+      <tr><th>слой</th><th>что показывает</th><th>зачем это дизайнеру</th></tr>
+      <tr><td>1 · блокаут и навигация</td><td>сетка 2 и 10 м, контуры зон, точки спавна, маршрут по терминалам</td><td>проверить, что планировка читается без декораций</td></tr>
+      <tr><td>2 · свет и видимость</td><td>конусы обзора, лучи видимости от игрока, зоны плафонов</td><td>найти места, где враг видит игрока раньше, чем игрок видит врага</td></tr>
+      <tr><td>3 · метрики</td><td>расстояния между точками с пересчётом в секунды, площади зон, плотность</td><td>аргумент в споре о длине перехода вместо «так короче»</td></tr>
+    </table>
+  </section>
+
+  <section class="doc-sec" id="lore">
+    <h2 class="sec-h">Сеттинг и лор</h2>
+    <div id="dLore"></div>
+  </section>
+
+  <section class="doc-sec" id="story">
+    <h2 class="sec-h">Сценарий: четыре бита</h2>
+    <p>Локация без сценария — это коридор. Сценарий задаёт, почему игрок идёт вперёд,
+      а не просто «в сторону следующей двери».</p>
+    <div class="beats" id="dBeats"></div>
+  </section>
+
+  <section class="doc-sec" id="encounters">
+    <h2 class="sec-h">Таблица энкаунтеров</h2>
+    <p>Каждое число в игре живёт здесь. Если в строке не написано, зачем она, — строка лишняя.</p>
+    <div class="tbl-wrap"><table class="tbl wide"><tbody id="dEncounters"></tbody></table></div>
+  </section>
+
+  <section class="doc-sec" id="pacing">
+    <h2 class="sec-h">Кривая темпа</h2>
+    <p>Так выглядит задуманная интенсивность по секундам прохождения. Разрывы — не сбои,
+      а точки, где игрок должен успеть перевести дыхание; без них подъём перестаёт читаться.</p>
+    <canvas id="pacingMain" class="chart" height="220"></canvas>
+    <p class="cap">Ось Y — интенсивность (0…1), ось X — секунды от старта. Подписи — события уровня.</p>
+  </section>
+
+  <section class="doc-sec" id="report">
+    <h2 class="sec-h">Плейтест: что и как я снимаю</h2>
+    <p>Плейтест без метрик — это мнение. Отчёт ниже собирается автоматически из
+      прохождения уровня прямо в браузере: цифры не вписаны в текст, они сняты
+      с конкретного прогона. Попробуйте — и отчёт пересоберётся под ваши числа.</p>
+
+    <div class="cols2">
+      <div class="card">
+        <div class="card-t">Что снимаю</div>
+        <ul class="bullets">
+          <li>время до первого контакта — сколько игрок шёл до первого врага</li>
+          <li>время на зачистку и до финала — темп уровня целиком</li>
+          <li>точность — попадание по движущейся цели в коридоре</li>
+          <li>урон по игроку — насколько враг точнее игрока</li>
+          <li>время в каждой зоне и плотность времени на площадь</li>
+          <li>кривую темпа и сравнение с задуманной</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-t">Как читаю результат</div>
+        <ul class="bullets">
+          <li>время до первого контакта ниже 40 с — игрок не успел освоиться</li>
+          <li>выше 110 с — до боя добраться неинтересно</li>
+          <li>точность ниже 25% — цель меньше зоны попадания</li>
+          <li>урон больше половины здоровья — враг стреляет точнее игрока</li>
+          <li>расхождение кривых — материал для одной гипотезы, а не для десяти правок</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="sec-h3">Правило одной правки</h3>
+    <p>За сессию меняется ровно один параметр. Иначе через две итерации нельзя
+      понять, что именно сработало, а дизайн-документ начинает повторять
+      обоснования, которых не было. Это же правило даёт пятнадцать итераций
+      на варгейме «Королевств Эридора», а не пятнадцать разных ощущений.</p>
+
+    <h3 class="sec-h3">Отчёт по плейтесту — пример</h3>
+    <p>Откройте уровень, пройдите объект до конца или умрите — и экран отчёта
+      соберётся из вашего прогона. Ниже в отчёте появляется и одна гипотеза
+      на следующую итерацию: что я поменяю и почему.</p>
+  </section>
+
+  <section class="doc-sec" id="spec">
+    <h2 class="sec-h">ТЗ на локацию</h2>
+    <p>Такой документ локацию получает вместе с блокаутом: свет, пропы, звук и приёмка
+      отдельными списками, чтобы каждый отдел видел своё.</p>
+    <div class="cols2" id="dSpec"></div>
+  </section>
+
+  <div id="dBody"></div>
+
+  <section class="doc-sec" id="match">
+    <h2 class="sec-h">Где закрыт каждый пункт вакансии</h2>
+    <p>Требования разложены по разделам: у каждого пункта есть место, где он закрыт.
+      Там, где пробел, — он назван прямо, а не спрятан формулировкой.</p>
+    <div class="cols3" id="dMatch"></div>
+  </section>
+
+  <section class="doc-sec" id="contacts">
+    <h2 class="sec-h">Контакты</h2>
+    <div id="dContacts2"></div>
+    <p class="sign" id="dSign"></p>
+    <div class="chg" id="dChangelog"></div>
+  </section>
+
+</main>
+
+<script src="content.js?v=1"></script>
+<script src="level.js?v=1"></script>
+<script src="game.js?v=1"></script>
+<script src="ui.js?v=1"></script>
+<script src="main.js?v=1"></script>
+</body>
+</html>
