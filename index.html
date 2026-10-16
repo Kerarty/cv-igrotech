@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ярослав Кукар — Game / Level Designer · Игро Тэк</title>
 <meta name="description" content="Резюме Game / Level Designer в форме играбельной локации: блокаут, слои дизайна, плейтест-отчёт и дизайн-документ.">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -22,9 +22,10 @@
     <a href="#contacts" class="navlink">контакты</a>
   </nav>
   <div class="tb-right">
+    <button id="btnResumeGame" class="btn sm accent" hidden>в игру</button>
     <a class="btn sm" id="btnPdf" href="assets/Yaroslav_Kukar_Game_Level_Designer.pdf" download>скачать pdf</a>
     <button id="btnRestart" class="btn sm" title="R">заново</button>
-    <button id="btnDoc" class="btn sm">документ</button>
+    <button id="btnDoc" class="btn sm">брифинг</button>
   </div>
 </header>
 
@@ -79,8 +80,9 @@
 
   <div id="gameLock" class="gamelock">
     <button id="btnBackToGame" class="lock-btn">
-      <span class="lock-big">В ИГРУ</span>
-      <span class="lock-sub">локация на паузе, пока вы читаете документ</span>
+      <span class="lock-big" id="lockBig">В ИГРУ</span>
+      <span class="lock-sub" id="lockSub">локация на паузе, пока вы читаете документ</span>
+      <span class="lock-keys">esc · пробел</span>
     </button>
   </div>
 </section>
@@ -281,10 +283,10 @@
 
 </main>
 
-<script src="content.js?v=2"></script>
-<script src="level.js?v=2"></script>
-<script src="game.js?v=2"></script>
-<script src="ui.js?v=2"></script>
-<script src="main.js?v=2"></script>
+<script src="content.js?v=4"></script>
+<script src="level.js?v=4"></script>
+<script src="game.js?v=4"></script>
+<script src="ui.js?v=4"></script>
+<script src="main.js?v=4"></script>
 </body>
 </html>

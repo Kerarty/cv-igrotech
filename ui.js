@@ -365,10 +365,20 @@ function updateHud() {
   const ch = $(".crosshair");
   ch.style.left = input.mouse.x + "px";
   ch.style.top = input.mouse.y + "px";
-  ch.style.opacity = gameLocked ? "0" : "0.55";
+  ch.style.opacity = resting() ? "0" : "0.55";
 
-  // замок: пока читатель в документе, уровень стоит и ждёт нажатия
-  $("#gameLock").classList.toggle("on", gameLocked);
+  // Плашка над уровнем. Причины две, и они выглядят по-разному: пауза по esc
+  // продолжается пробелом, режим документа — только кнопкой.
+  const lock = $("#gameLock");
+  lock.classList.toggle("on", resting());
+  lock.classList.toggle("soft", paused && !gameLocked);
+  $("#lockBig").textContent = paused && !gameLocked ? "ПРОДОЛЖИТЬ" : "В ИГРУ";
+  $("#lockSub").textContent = paused && !gameLocked
+    ? "пауза · листайте вниз, там интерактивное резюме"
+    : "локация на паузе, пока вы читаете документ";
+
+  // Кнопка в шапке нужна, когда плашка уехала из поля зрения вместе с уровнем
+  $("#btnResumeGame").hidden = !resting();
 
   minimap.c.style.display = showMini ? "block" : "none";
   drawMinimap();
@@ -601,7 +611,7 @@ function openTerminal(id) {
 
 function closeTerminal() {
   $("#termPanel").classList.remove("open");
-  state = gameLocked ? "locked" : "play";
+  state = restingState();
   syncScrollLock();
 }
 
@@ -621,10 +631,10 @@ function showScreen(id) {
   $$(".screen").forEach((n) => n.classList.remove("open"));
   if (id) $("#" + id).classList.add("open");
 
-  // Закрытие экрана не должно незаметно возвращать игру в бой: если читатель
-  // выбрал интерактивное резюме, состояние «заперто» держится до нажатия
-  // кнопки «в игру».
-  state = id ? "screen" : (gameLocked ? "locked" : "play");
+  // Закрытие экрана не должно незаметно возвращать игру в бой: если игрок
+  // на паузе или читает документ, состояние «стоит» держится до esc, пробела
+  // или кнопки «в игру».
+  state = id ? "screen" : restingState();
   syncScrollLock();
 
   // графики рисуются по фактической ширине контейнера, а он появляется

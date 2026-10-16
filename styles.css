@@ -57,15 +57,15 @@ a:hover { text-decoration: underline; }
   z-index: 60;
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 10px 18px;
+  gap: 12px;
+  padding: 9px 16px;
   background: rgba(7, 10, 14, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.tb-left { display: flex; align-items: baseline; gap: 10px; }
-.tb-left strong { letter-spacing: 0.16em; font-size: 13px; }
-.tb-sub { color: var(--faint); font-size: 11px; }
+.tb-left { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.tb-left strong { letter-spacing: 0.16em; font-size: 13px; white-space: nowrap; }
+.tb-sub { color: var(--faint); font-size: 11px; white-space: nowrap; }
 .dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--green);
@@ -73,10 +73,10 @@ a:hover { text-decoration: underline; }
   animation: pulse 2.2s infinite;
 }
 @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
-.tb-nav { display: flex; gap: 14px; margin-left: auto; font-size: 12px; }
+.tb-nav { display: flex; gap: 12px; margin-left: auto; font-size: 12px; white-space: nowrap; }
 .tb-nav a { color: var(--dim); }
 .tb-nav a:hover { color: var(--cyan); text-decoration: none; }
-.tb-right { display: flex; gap: 8px; }
+.tb-right { display: flex; gap: 6px; flex-shrink: 0; }
 
 .btn {
   font-family: var(--mono);
@@ -95,6 +95,9 @@ a:hover { text-decoration: underline; }
 .btn.big:hover { background: rgba(127, 227, 255, 0.14); }
 .btn.alt { border-color: var(--line2); color: var(--text); }
 .btn.alt:hover { border-color: var(--amber); background: rgba(255, 179, 71, 0.1); color: #fff; }
+.btn.accent { border-color: var(--amber); color: var(--amber); }
+.btn.accent:hover { background: rgba(255, 179, 71, 0.14); color: #fff; }
+.btn[hidden] { display: none; }
 
 /* --- стартовый экран: три входа --- */
 .start-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
@@ -127,6 +130,12 @@ a:hover { text-decoration: underline; }
 .lock-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
 .lock-big { font-size: 30px; letter-spacing: 0.3em; color: #fff; }
 .lock-sub { font-size: 11px; color: var(--faint); letter-spacing: 0.06em; }
+.lock-keys { font-size: 10px; color: #4d5a6b; letter-spacing: 0.18em; text-transform: uppercase; }
+
+/* Пауза по esc отличается от режима документа: продолжать можно пробелом
+   и esc, а не только кнопкой. */
+.gamelock.soft .lock-btn { border-color: var(--amber); box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.18), 0 0 60px rgba(255, 179, 71, 0.08); }
+.gamelock.soft .lock-big { color: var(--amber); }
 
 /* Модальные окна не должны двигать страницу под собой: колесо и пробел
    в терминале уезжали вниз по документу.
@@ -454,12 +463,15 @@ kbd {
 .mref { font-size: 10px; color: var(--amber); white-space: nowrap; }
 
 /* ---------------------------------------------------------- АДАПТИВ */
+@media (max-width: 1180px) {
+  .tb-sub { display: none; }
+}
 @media (max-width: 900px) {
   .doc-hero { grid-template-columns: 1fr; }
   .brief-goals { grid-template-columns: repeat(2, 1fr); }
   .ctl { grid-template-columns: 1fr; }
   .stage { height: 64vh; }
-  .tb-sub { display: none; }
+  .tb-nav { display: none; }
 }
 @media (max-width: 620px) {
   body { font-size: 13px; }

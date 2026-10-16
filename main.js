@@ -4,6 +4,7 @@
 
 let state = "boot";
 let gameLocked = false;
+let paused = false;
 const keys = {};
 const input = { mouse: { x: 0, y: 0 } };
 let inputFire = false;
@@ -11,21 +12,55 @@ let showMini = true;
 
 const G = () => $("#game");
 
+/**
+ * Клавиша для обработчика.
+ *
+ * Основной источник — e.code: он не зависит от раскладки, поэтому WASD
+ * работает и на кириллице. Но в некоторых окружениях (удалённый рабочий
+ * стол, часть экранных читалок) code приходит пустым, и игра целиком
+ * перестаёт отвечать. Для таких случаев есть запасной путь через e.key.
+ */
+const KEY_FALLBACK = {
+  Escape: "Escape", Enter: "Enter", " ": "Space", Spacebar: "Space", Space: "Space",
+  ArrowUp: "ArrowUp", ArrowDown: "ArrowDown", ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight",
+  PageUp: "PageUp", PageDown: "PageDown", Home: "Home", End: "End",
+  Shift: "ShiftLeft",
+  w: "KeyW", a: "KeyA", s: "KeyS", d: "KeyD",
+  e: "KeyE", q: "KeyQ", r: "KeyR",
+  1: "Digit1", 2: "Digit2", 3: "Digit3", 4: "Digit4",
+  W: "KeyW", A: "KeyA", S: "KeyS", D: "KeyD",
+  E: "KeyE", Q: "KeyQ", R: "KeyR",
+};
+
+const keyOf = (e) => e.code || KEY_FALLBACK[e.key] || "";
+
+/* --- состояние покоя ---------------------------------------------------- */
+/** Состояние, в котором локация стоит, а страница листается свободно. */
+const resting = () => paused || gameLocked;
+const restingState = () => (paused ? "paused" : gameLocked ? "locked" : "play");
+
 /* --- три входа со стартового экрана ----------------------------------- */
 
 /** «Интерактивное резюме»: уходим в документ и запираем локацию. */
 function openDocument() {
   gameLocked = true;
+  paused = false;
   showScreen(null);
   document.querySelector(".doc").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Кнопка «в игру» на запертом уровне: снимаем замок и возвращаемся. */
-function backToGame() {
+/** Esc во время игры: пауза без модального окна, чтобы можно было листать. */
+function pauseGame() {
+  paused = true;
+  showScreen(null);
+}
+
+/** Кнопка «в игру»: снимает и паузу, и замок, и возвращает к уровню. */
+function resumeGame() {
+  paused = false;
   gameLocked = false;
   showScreen(null);
   document.querySelector(".stage").scrollIntoView({ behavior: "smooth", block: "start" });
-  flash("Локация продолжена с того же места");
 }
 
 /* --- события уровня ------------------------------------------------------ */
@@ -132,8 +167,10 @@ function checkWin() {
 
 function restart() {
   resetRun();
+  paused = false;
   gameLocked = false;
   showScreen(null);
+  document.querySelector(".stage").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /* --- ввод ------------------------------------------------------------------ */
@@ -149,25 +186,36 @@ function bindInput() {
   };
 
   window.addEventListener("keydown", (e) => {
-    const k = e.code;
+    const k = keyOf(e);
+    if (!k) return;
     keys[k] = true;
 
     const modal = !!document.querySelector(".screen.open") ||
       $("#termPanel").classList.contains("open");
-    if (SCROLL_KEYS[k] && (state === "play" || modal)) e.preventDefault();
+
+    // Пробел и стрелки прокручивают страницу. В игре и в открытой панели это
+    // ломает управление, там гасим всё. На паузе гасим только пробел — он
+    // снимает паузу, а стрелки и PageDown нужны, чтобы листать резюме.
+    const block = state === "play" || modal || (state === "paused" && k === "Space");
+    if (SCROLL_KEYS[k] && block) e.preventDefault();
 
     if (k === "Escape") {
       e.preventDefault();
       if (state === "panel") closeTerminal();
       else if (state === "screen") showScreen(null);
-      else if (state === "locked") backToGame();
+      else if (resting()) resumeGame();
+      else if (state === "play") pauseGame();
       else { buildBriefing(); showScreen("brief"); }
       return;
     }
     if (state !== "play") {
-      if (k === "Space" && (state === "screen" || state === "panel")) {
+      // Пробел на паузе продолжает игру — так же, как на стартовом экране
+      // запускал бой. Не привыкать к тому, что после паузы надо искать кнопку.
+      if (k === "Space" && (state === "screen" || state === "panel" || resting())) {
         e.preventDefault();
-        if (state === "panel") closeTerminal(); else showScreen(null);
+        if (state === "panel") closeTerminal();
+        else if (resting()) resumeGame();   // showScreen(null) тут не поможет:
+        else showScreen(null);              // он пересчитывает состояние, но флаг паузы не снимает
       }
       if (k === "KeyR" && state === "screen") restart();
       return;
@@ -182,7 +230,10 @@ function bindInput() {
     if (k === "Digit4") designLayer = 3;
   });
 
-  window.addEventListener("keyup", (e) => { keys[e.code] = false; });
+  window.addEventListener("keyup", (e) => {
+    const k = keyOf(e);
+    if (k) keys[k] = false;
+  });
 
   cv.addEventListener("mousemove", (e) => {
     const r = cv.getBoundingClientRect();
@@ -204,9 +255,12 @@ function bindInput() {
   // честнее показать документ, чем делать неудобные кнопки
   cv.addEventListener("touchstart", () => { if (window.innerWidth < 720) showDocSheet(); }, { once: true });
 
-  $("#btnStart").addEventListener("click", () => { gameLocked = false; showScreen(null); });
+  $("#btnStart").addEventListener("click", () => {
+    paused = false; gameLocked = false; showScreen(null);
+  });
   $("#btnResume").addEventListener("click", openDocument);
-  $("#btnBackToGame").addEventListener("click", backToGame);
+  $("#btnBackToGame").addEventListener("click", resumeGame);
+  $("#btnResumeGame").addEventListener("click", resumeGame);
   $("#btnRestart").addEventListener("click", restart);
   $("#btnDoc").addEventListener("click", () => { buildBriefing(); showScreen("brief"); });
   $("#termClose").addEventListener("click", closeTerminal);
