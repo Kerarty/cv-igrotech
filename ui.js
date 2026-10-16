@@ -365,6 +365,10 @@ function updateHud() {
   const ch = $(".crosshair");
   ch.style.left = input.mouse.x + "px";
   ch.style.top = input.mouse.y + "px";
+  ch.style.opacity = gameLocked ? "0" : "0.55";
+
+  // замок: пока читатель в документе, уровень стоит и ждёт нажатия
+  $("#gameLock").classList.toggle("on", gameLocked);
 
   minimap.c.style.display = showMini ? "block" : "none";
   drawMinimap();
@@ -547,6 +551,34 @@ function h2(t) { return el("h2", "sec-h", t); }
 function h3(t) { return el("h3", "sec-h3", t); }
 function p(t) { return el("p", null, t); }
 
+/**
+ * Прокрутка страницы под модальными окнами.
+ *
+ * Пробел и колесо мыши в терминале уезжали вниз по документу: страница
+ * прокручивалась под открытой панелью, и её закрытие возвращало игрока
+ * совсем в другое место. Поэтому позиция запоминается и возвращается
+ * явно — полагаться на браузер здесь нельзя.
+ */
+let scrollMemo = 0;
+
+function syncScrollLock() {
+  const modal = !!document.querySelector(".screen.open") ||
+    $("#termPanel").classList.contains("open");
+  const locked = document.documentElement.classList.contains("modal-open");
+
+  if (modal && !locked) {
+    scrollMemo = window.scrollY;
+    document.documentElement.classList.add("modal-open");
+    document.body.classList.add("modal-open");
+  } else if (!modal && locked) {
+    document.documentElement.classList.remove("modal-open");
+    document.body.classList.remove("modal-open");
+    // именно мгновенно: со smooth анимацией страница продолжала ехать
+    // к старой позиции уже после того, как панель закрылась
+    window.scrollTo({ top: scrollMemo, left: 0, behavior: "instant" });
+  }
+}
+
 function openTerminal(id) {
   const t = termById[id];
   if (!t) return;
@@ -564,11 +596,13 @@ function openTerminal(id) {
   $("#termSub").textContent = t.sub + " · прочитано: " + readCount + " из " + TERMINALS.length;
   $("#termPanel").classList.add("open");
   state = "panel";
+  syncScrollLock();
 }
 
 function closeTerminal() {
   $("#termPanel").classList.remove("open");
-  state = "play";
+  state = gameLocked ? "locked" : "play";
+  syncScrollLock();
 }
 
 function flash(msg) {
@@ -586,7 +620,13 @@ function flash(msg) {
 function showScreen(id) {
   $$(".screen").forEach((n) => n.classList.remove("open"));
   if (id) $("#" + id).classList.add("open");
-  state = id ? "screen" : "play";
+
+  // Закрытие экрана не должно незаметно возвращать игру в бой: если читатель
+  // выбрал интерактивное резюме, состояние «заперто» держится до нажатия
+  // кнопки «в игру».
+  state = id ? "screen" : (gameLocked ? "locked" : "play");
+  syncScrollLock();
+
   // графики рисуются по фактической ширине контейнера, а он появляется
   // только сейчас — до этого размер нулевой и кривая вышла бы пустой
   if (id === "report") {

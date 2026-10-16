@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ярослав Кукар — Game / Level Designer · Игро Тэк</title>
 <meta name="description" content="Резюме Game / Level Designer в форме играбельной локации: блокаут, слои дизайна, плейтест-отчёт и дизайн-документ.">
-<link rel="stylesheet" href="styles.css?v=1">
+<link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
 
@@ -22,6 +22,7 @@
     <a href="#contacts" class="navlink">контакты</a>
   </nav>
   <div class="tb-right">
+    <a class="btn sm" id="btnPdf" href="assets/Yaroslav_Kukar_Game_Level_Designer.pdf" download>скачать pdf</a>
     <button id="btnRestart" class="btn sm" title="R">заново</button>
     <button id="btnDoc" class="btn sm">документ</button>
   </div>
@@ -75,6 +76,13 @@
 
   <div class="crosshair" aria-hidden="true"></div>
   <div id="flash" class="flash"></div>
+
+  <div id="gameLock" class="gamelock">
+    <button id="btnBackToGame" class="lock-btn">
+      <span class="lock-big">В ИГРУ</span>
+      <span class="lock-sub">локация на паузе, пока вы читаете документ</span>
+    </button>
+  </div>
 </section>
 
 <!-- ===================== ЭКРАНЫ ===================== -->
@@ -82,14 +90,24 @@
 <div id="brief" class="screen">
   <div class="sheet">
     <div class="sheet-h">
-      <div class="tag">брифинг</div>
+      <div class="tag">интерактивное резюме</div>
       <h1>ОБЪЕКТ КАДРИС</h1>
       <p class="sub">Game / Level Designer · ООО «Игро Тэк»</p>
+
+      <div class="start-actions">
+        <button id="btnStart" class="btn big">В бой</button>
+        <button id="btnResume" class="btn big alt">Интерактивное резюме</button>
+        <a class="btn big alt" href="assets/Yaroslav_Kukar_Game_Level_Designer.pdf" download>Скачать PDF</a>
+      </div>
+      <p class="start-note">
+        Три входа. «В бой» — пройти локацию и прочитать разделы по ходу.
+        «Интерактивное резюме» — тот же материал текстом, без игры.
+        PDF — одна страница A4, как вложение к письму.
+      </p>
     </div>
     <div id="briefBody" class="sheet-b"></div>
     <div class="sheet-f">
-      <button id="btnStart" class="btn big">В бой · читать уровень</button>
-      <span class="hint">или пробелом</span>
+      <span class="hint">управление — внизу · esc — пауза · R — пройти заново</span>
     </div>
   </div>
 </div>
@@ -263,10 +281,10 @@
 
 </main>
 
-<script src="content.js?v=1"></script>
-<script src="level.js?v=1"></script>
-<script src="game.js?v=1"></script>
-<script src="ui.js?v=1"></script>
-<script src="main.js?v=1"></script>
+<script src="content.js?v=2"></script>
+<script src="level.js?v=2"></script>
+<script src="game.js?v=2"></script>
+<script src="ui.js?v=2"></script>
+<script src="main.js?v=2"></script>
 </body>
 </html>

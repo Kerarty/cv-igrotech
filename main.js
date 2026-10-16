@@ -3,12 +3,30 @@
    ========================================================================= */
 
 let state = "boot";
+let gameLocked = false;
 const keys = {};
 const input = { mouse: { x: 0, y: 0 } };
 let inputFire = false;
 let showMini = true;
 
 const G = () => $("#game");
+
+/* --- три входа со стартового экрана ----------------------------------- */
+
+/** «Интерактивное резюме»: уходим в документ и запираем локацию. */
+function openDocument() {
+  gameLocked = true;
+  showScreen(null);
+  document.querySelector(".doc").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/** Кнопка «в игру» на запертом уровне: снимаем замок и возвращаемся. */
+function backToGame() {
+  gameLocked = false;
+  showScreen(null);
+  document.querySelector(".stage").scrollIntoView({ behavior: "smooth", block: "start" });
+  flash("Локация продолжена с того же места");
+}
 
 /* --- события уровня ------------------------------------------------------ */
 function onFirstContact() {
@@ -114,6 +132,7 @@ function checkWin() {
 
 function restart() {
   resetRun();
+  gameLocked = false;
   showScreen(null);
 }
 
@@ -121,14 +140,27 @@ function restart() {
 function bindInput() {
   const cv = G();
 
+  // Пробел и стрелки прокручивают страницу. В игре и в открытой панели
+  // это ломает чтение: страница уезжает под модальным окном. Документ при
+  // этом прокручивается как обычно — иначе его нельзя было бы читать.
+  const SCROLL_KEYS = {
+    Space: 1, ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1,
+    PageUp: 1, PageDown: 1, Home: 1, End: 1,
+  };
+
   window.addEventListener("keydown", (e) => {
     const k = e.code;
     keys[k] = true;
+
+    const modal = !!document.querySelector(".screen.open") ||
+      $("#termPanel").classList.contains("open");
+    if (SCROLL_KEYS[k] && (state === "play" || modal)) e.preventDefault();
 
     if (k === "Escape") {
       e.preventDefault();
       if (state === "panel") closeTerminal();
       else if (state === "screen") showScreen(null);
+      else if (state === "locked") backToGame();
       else { buildBriefing(); showScreen("brief"); }
       return;
     }
@@ -172,7 +204,9 @@ function bindInput() {
   // честнее показать документ, чем делать неудобные кнопки
   cv.addEventListener("touchstart", () => { if (window.innerWidth < 720) showDocSheet(); }, { once: true });
 
-  $("#btnStart").addEventListener("click", () => showScreen(null));
+  $("#btnStart").addEventListener("click", () => { gameLocked = false; showScreen(null); });
+  $("#btnResume").addEventListener("click", openDocument);
+  $("#btnBackToGame").addEventListener("click", backToGame);
   $("#btnRestart").addEventListener("click", restart);
   $("#btnDoc").addEventListener("click", () => { buildBriefing(); showScreen("brief"); });
   $("#termClose").addEventListener("click", closeTerminal);
@@ -192,7 +226,9 @@ function bindInput() {
       const target = document.querySelector(a.getAttribute("href"));
       if (!target) return;
       e.preventDefault();
-      if (state !== "play") showScreen(null);
+      // при открытом экране закрываем его, но замок уровня не трогаем:
+      // выбранный «интерактивный» режим должен пережить переход по ссылке
+      if (state === "screen") showScreen(null);
       setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
     });
   });

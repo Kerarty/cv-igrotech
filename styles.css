@@ -93,6 +93,47 @@ a:hover { text-decoration: underline; }
 .btn.sm { padding: 5px 10px; font-size: 11px; }
 .btn.big { padding: 11px 22px; font-size: 14px; border-color: var(--cyan); color: #fff; }
 .btn.big:hover { background: rgba(127, 227, 255, 0.14); }
+.btn.alt { border-color: var(--line2); color: var(--text); }
+.btn.alt:hover { border-color: var(--amber); background: rgba(255, 179, 71, 0.1); color: #fff; }
+
+/* --- стартовый экран: три входа --- */
+.start-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.start-actions .btn.big { flex: 1 1 170px; }
+.start-note { margin: 14px 0 0; font-size: 11px; color: var(--faint); max-width: 62ch; }
+
+/* --- замок на игре ---
+   Выбрали «интерактивное резюме» — уровень стоит, поверх висит кнопка.
+   Пока её не нажали, уровень не принимает ввод: иначе документ и игра
+   дрались бы за клавиатуру. */
+.gamelock {
+  position: absolute; inset: 0; z-index: 40;
+  display: none;
+  align-items: center; justify-content: center;
+  background: rgba(5, 8, 12, 0.82);
+  backdrop-filter: blur(3px);
+}
+.gamelock.on { display: flex; }
+.lock-btn {
+  font-family: var(--mono);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 30px 54px;
+  background: rgba(10, 16, 22, 0.94);
+  border: 1px solid var(--cyan);
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(127, 227, 255, 0.2), 0 0 60px rgba(127, 227, 255, 0.12);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.lock-btn:hover { background: rgba(20, 34, 46, 0.97); box-shadow: 0 0 0 1px var(--cyan), 0 0 80px rgba(127, 227, 255, 0.28); }
+.lock-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+.lock-big { font-size: 30px; letter-spacing: 0.3em; color: #fff; }
+.lock-sub { font-size: 11px; color: var(--faint); letter-spacing: 0.06em; }
+
+/* Модальные окна не должны двигать страницу под собой: колесо и пробел
+   в терминале уезжали вниз по документу.
+   Важно: overflow задаётся и на html, и на body. Только на body он по
+   спецификации распространяется на вьюпорт и при снятии сбрасывает
+   позицию прокрутки — страница прыгала с середины документа наверх. */
+html.modal-open, body.modal-open { overflow: hidden; }
 
 /* ---------------------------------------------------------------- СЦЕНА */
 .stage { position: relative; height: 78vh; min-height: 520px; overflow: hidden; background: #05080b; }
